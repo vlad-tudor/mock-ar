@@ -1,24 +1,27 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import { createAmbientLight, initialiseScene } from "./three/sceneUtils";
+import { createCube } from "./three/objectUtils";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+function start() {
+  const threeContainer = document.getElementById("threejs-container");
+  if (!threeContainer) return;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+  const [addLight] = createAmbientLight();
+  const { scene, animationManager } = initialiseScene(threeContainer, {
+    cameraPosition: [0, 0, 5],
+    cameraRotation: [0, 0, 0],
+  });
+
+  const cube = createCube([0, 0, -3]);
+  scene.add(cube);
+  addLight(scene);
+
+  const animateCube = () => {
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+  };
+
+  animationManager.addCallback(animateCube);
+  animationManager.start();
+}
+
+start();

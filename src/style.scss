@@ -1,0 +1,21 @@
+body,
+html {
+  margin: 0;
+}
+
+#app {
+  width: 100%;
+  min-height: 80vh;
+  text-align: center;
+  overflow: hidden;
+}
+
+#threejs-container {
+  position: absolute;
+  display: flex;
+  margin: 0;
+  width: 101%;
+  height: 90%;
+  z-index: -1;
+  background-color: lightgray;
+}
