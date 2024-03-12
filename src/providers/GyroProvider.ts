@@ -1,4 +1,4 @@
-import { CallbackManager } from "./Listener";
+import { CallbackManager } from "./CallbackManager";
 
 /**
  * * _alpha:_ **heading** - think compass direction
@@ -14,10 +14,16 @@ type DeviceOrientation = {
 /**
  * Cute state encapsulation for the device orientation
  */
-export class GyroProvider extends CallbackManager {
+export class GyroProvider {
   private static alpha: number = 0;
   private static beta: number = 0;
   private static gamma: number = 0;
+
+  private static callbackManager = new CallbackManager();
+
+  public static addCallback(callback: () => void) {
+    GyroProvider.callbackManager.addCallback(callback);
+  }
 
   /**
    * NOTE: permissions are checked before this method is called
@@ -50,7 +56,7 @@ export class GyroProvider extends CallbackManager {
     GyroProvider.beta = event.beta ?? GyroProvider.beta;
     GyroProvider.gamma = event.gamma ?? GyroProvider.gamma;
 
-    GyroProvider.runCallbacks();
+    GyroProvider.callbackManager.runCallbacks();
   }
 
   public static get rawValues(): DeviceOrientation {

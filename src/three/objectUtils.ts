@@ -14,3 +14,29 @@ export const createCube = ([x, y, z]: XYZ): Mesh => {
 
   return cube;
 };
+
+/**
+ * Generates a flat grid of cubes
+ * @param sideLength side length of grid
+ * @param height height above the ground
+ * @param spacing spacing between cubes
+ * @returns
+ */
+export const generateCubesGrid = (sideLength: number, height: number, spacing: number): Mesh[] => {
+  const cubes = [];
+  const start = (-(sideLength - 1) * spacing) / 2; // Calculate start position to center grid at origin
+
+  for (let i = 0; i < sideLength; i++) {
+    // Rows
+    for (let j = 0; j < sideLength; j++) {
+      // Columns
+      const x = start + j * spacing; // Calculate x position
+      const y = start + i * spacing; // Calculate y position
+
+      const cube = createCube([x, y, height]);
+      cubes.push(cube);
+    }
+  }
+
+  return cubes;
+};

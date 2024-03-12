@@ -1,50 +1,7 @@
-import {
-  AmbientLight,
-  DirectionalLight,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-} from "three";
+import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
 import { CameraOptions } from "./types";
-
-// TODO: Consider rewriting into a class
-
-/**
- * Small utility to manage the animation loop.
- * @returns An object to manage the animation.
- */
-const manageAnimation = () => {
-  let animationId = 0;
-  let running = true;
-  const callbacks: (() => void)[] = [];
-
-  const animate = () => {
-    if (!running) return;
-    animationId = requestAnimationFrame(animate);
-    callbacks.forEach((callback) => callback());
-  };
-
-  return {
-    start: () => {
-      running = true;
-      animate();
-    },
-    stop: () => {
-      running = false;
-      cancelAnimationFrame(animationId);
-    },
-    addCallback: (callback: () => void) => {
-      callbacks.push(callback);
-    },
-    removeCallback: (callback: () => void) => {
-      const index = callbacks.indexOf(callback);
-      if (index !== -1) {
-        callbacks.splice(index, 1);
-      }
-    },
-  };
-};
+import { AnimationManager } from "./AnimationManager";
 
 /**
  * @param container where the three scene will be attached
@@ -67,7 +24,7 @@ export function initialiseScene(
   renderer.setSize(width, height);
   container.appendChild(renderer.domElement);
 
-  const animationManager = manageAnimation();
+  const animationManager = new AnimationManager();
 
   animationManager.addCallback(() => renderer.render(scene, camera));
 
