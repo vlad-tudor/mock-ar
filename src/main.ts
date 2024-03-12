@@ -1,27 +1,28 @@
-import { createAmbientLight, initialiseScene } from "./three/sceneUtils";
-import { createCube } from "./three/objectUtils";
+import { GyroProvider } from "./providers/GyroProvider";
+import { attachPermissionsGetter } from "./providers/permissions";
+import { startThreeApp } from "./three";
+import { logToElement } from "./utils";
 
-function start() {
+async function main() {
+  const startButton = document.getElementById("start-button");
   const threeContainer = document.getElementById("threejs-container");
-  if (!threeContainer) return;
+  const logs = document.getElementById("logs");
 
-  const [addLight] = createAmbientLight();
-  const { scene, animationManager } = initialiseScene(threeContainer, {
-    cameraPosition: [0, 0, 5],
-    cameraRotation: [0, 0, 0],
-  });
+  if (!threeContainer || !startButton || !logs) return;
 
-  const cube = createCube([0, 0, -3]);
-  scene.add(cube);
-  addLight(scene);
+  const hasPermissions = await attachPermissionsGetter(startButton);
+  if (!hasPermissions) {
+    console.error("App requires permissions to run");
+    return;
+  }
 
-  const animateCube = () => {
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-  };
+  // logging shenanigans
+  const { add } = logToElement(logs);
+  const log = () => add(GyroProvider.rawValues);
+  GyroProvider.addCallback(log);
 
-  animationManager.addCallback(animateCube);
-  animationManager.start();
+  GyroProvider.start();
+  startThreeApp(threeContainer);
 }
 
-start();
+main();

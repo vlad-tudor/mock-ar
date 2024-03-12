@@ -3,19 +3,49 @@ html {
   margin: 0;
 }
 
-#app {
+#logs {
+  display: flex;
+  flex-direction: column;
+  font-size: 2rem;
+  height: 100%;
   width: 100%;
-  min-height: 80vh;
-  text-align: center;
-  overflow: hidden;
 }
 
-#threejs-container {
-  position: absolute;
-  display: flex;
-  margin: 0;
-  width: 101%;
-  height: 90%;
-  z-index: -1;
-  background-color: lightgray;
+#threejs-app {
+  width: 100%;
+  height: 70vh;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+
+  #threejs-container {
+    position: absolute;
+    display: flex;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: lightgray;
+  }
+}
+
+.spacer {
+  height: 10vh;
+  width: 100%;
+  box-sizing: border-box;
+
+  &.bottom {
+    padding: 1rem;
+
+    // flex
+    display: inline-flex;
+    justify-content: space-around;
+    gap: 1rem;
+
+    #start-button {
+      font-size: 2rem;
+      width: 15rem;
+      height: 5rem;
+    }
+  }
 }
