@@ -1,5 +1,6 @@
 import { GyroProvider } from "../providers/GyroProvider";
 import { generateCubesGrid } from "./objectUtils";
+import { orientationToQuaternion } from "./quaternions";
 import { createAmbientLight, initialiseScene } from "./sceneUtils";
 
 /**
@@ -9,8 +10,8 @@ import { createAmbientLight, initialiseScene } from "./sceneUtils";
  */
 export const startThreeApp = (container: HTMLElement) => {
   const [addLight] = createAmbientLight();
-  const { scene, animationManager } = initialiseScene(container, {
-    cameraPosition: [0, 0, 15], // camera pointing down
+  const { scene, animationManager, camera } = initialiseScene(container, {
+    cameraPosition: [0, 0, 10], // camera pointing down
     cameraRotation: [0, 0, 0],
   });
 
@@ -18,17 +19,13 @@ export const startThreeApp = (container: HTMLElement) => {
   addLight(scene);
 
   // cubes/objects
-  const cubes = generateCubesGrid(10, -0, 2);
+  const cubes = generateCubesGrid(20, -0, 3);
   scene.add(...cubes);
 
   // render loop
   const render = () => {
-    const { alpha, beta, gamma } = GyroProvider.rawValues;
-
-    // animating the camera
-    scene.rotation.x = beta * -(Math.PI / 180);
-    scene.rotation.y = gamma * -(Math.PI / 180);
-    scene.rotation.z = alpha * -(Math.PI / 180);
+    // changing the camera orientation based on the device orientation
+    camera.quaternion.copy(orientationToQuaternion(GyroProvider.rawValues));
 
     // animating the cubes
     cubes.forEach((cube) => {

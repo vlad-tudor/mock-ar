@@ -1,15 +1,5 @@
 import { CallbackManager } from "./CallbackManager";
-
-/**
- * * _alpha:_ **heading** - think compass direction
- * * _beta:_ **pitch** - front-to-back tilt (portrait)
- * * _gamma:_ **roll** - left-to-right tilt (landscape)
- */
-type DeviceOrientation = {
-  alpha: number;
-  beta: number;
-  gamma: number;
-};
+import { DeviceOrientation } from "./types";
 
 /**
  * Cute state encapsulation for the device orientation
@@ -52,6 +42,8 @@ export class GyroProvider {
    * -- maybe instantiating the class could give access to the average?
    */
   private static updateOrientation(event: DeviceOrientationEvent) {
+    // @ts-ignore
+    console.info({ compass: event.webkitCompassHeading });
     GyroProvider.alpha = event.alpha ?? GyroProvider.alpha;
     GyroProvider.beta = event.beta ?? GyroProvider.beta;
     GyroProvider.gamma = event.gamma ?? GyroProvider.gamma;
