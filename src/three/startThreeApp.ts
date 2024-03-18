@@ -25,7 +25,7 @@ export const startThreeApp = (container: HTMLElement) => {
   // render loop
   const render = () => {
     // changing the camera orientation based on the device orientation
-    camera.quaternion.copy(orientationToQuaternion(GyroProvider.rawValues));
+    camera.quaternion.copy(orientationToQuaternion({ ...GyroProvider.rawValues }));
 
     // animating the cubes
     cubes.forEach((cube) => {

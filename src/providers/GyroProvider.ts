@@ -9,6 +9,8 @@ export class GyroProvider {
   private static beta: number = 0;
   private static gamma: number = 0;
 
+  private static compass: number = 0;
+
   private static callbackManager = new CallbackManager();
 
   public static addCallback(callback: () => void) {
@@ -42,8 +44,10 @@ export class GyroProvider {
    * -- maybe instantiating the class could give access to the average?
    */
   private static updateOrientation(event: DeviceOrientationEvent) {
+    // TODO: write additional logic to support Android devices.
     // @ts-ignore
-    console.info({ compass: event.webkitCompassHeading });
+    GyroProvider.compass = event.webkitCompassHeading ?? GyroProvider.compass;
+
     GyroProvider.alpha = event.alpha ?? GyroProvider.alpha;
     GyroProvider.beta = event.beta ?? GyroProvider.beta;
     GyroProvider.gamma = event.gamma ?? GyroProvider.gamma;
@@ -51,6 +55,9 @@ export class GyroProvider {
     GyroProvider.callbackManager.runCallbacks();
   }
 
+  public static get location() {
+    return { compass: GyroProvider.compass };
+  }
   public static get rawValues(): DeviceOrientation {
     return {
       alpha: this.alpha,
