@@ -9,8 +9,6 @@ const ipAddress = Object.values(networkInterfaces())
   .flat()
   .find((iface) => iface?.family === "IPv4" && !iface.internal)?.address;
 
-//   VITE_LOG_SERVER_URL=https://172.20.10.3:8080
-
 const envPath = ".env";
 const content = `VITE_LOG_SERVER_URL=https://${ipAddress}:${LOGGING_SERVER_PORT}`;
 

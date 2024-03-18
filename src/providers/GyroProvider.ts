@@ -13,6 +13,8 @@ export class GyroProvider {
 
   private static callbackManager = new CallbackManager();
 
+  public static running = false;
+
   public static addCallback(callback: () => void) {
     GyroProvider.callbackManager.addCallback(callback);
   }
@@ -44,6 +46,10 @@ export class GyroProvider {
    * -- maybe instantiating the class could give access to the average?
    */
   private static updateOrientation(event: DeviceOrientationEvent) {
+    if (!GyroProvider.running) {
+      GyroProvider.running = true;
+    }
+
     // TODO: write additional logic to support Android devices.
     // @ts-ignore
     GyroProvider.compass = event.webkitCompassHeading ?? GyroProvider.compass;
