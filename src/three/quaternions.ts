@@ -1,4 +1,4 @@
-import { Euler, MathUtils, Quaternion } from "three";
+import { Euler, MathUtils, Quaternion, Vector3 } from "three";
 import { DeviceOrientation } from "../providers/types";
 
 /**
@@ -16,9 +16,14 @@ export const orientationToQuaternion = ({ alpha, beta, gamma }: DeviceOrientatio
   // Create Euler angles from the device orientation
   // Note: The 'ZXY' order is used for converting device orientation to Three.js Euler angles
   const euler = new Euler(betaRad, gammaRad, alphaRad, "ZXY");
-
   // Convert Euler angles to Quaternion
-  const quaternion = new Quaternion().setFromEuler(euler);
+  return new Quaternion().setFromEuler(euler);
+};
 
-  return quaternion;
+/**
+ * Checks whether the device is in an orientation which allows 'calibration'
+ * this is in t
+ */
+export const ableToCalibrate = (orientation: DeviceOrientation, degreesThreshold = 3): boolean => {
+  return Math.abs(orientation.beta) < 3 && Math.abs(orientation.gamma) <= degreesThreshold;
 };

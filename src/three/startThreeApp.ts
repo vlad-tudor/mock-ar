@@ -1,7 +1,9 @@
-import { GyroProvider } from "../providers/GyroProvider";
-import { generateCubesGrid } from "./objectUtils";
-import { orientationToQuaternion } from "./quaternions";
+import { MathUtils, Quaternion, Vector3 } from "three";
+import { SensorsProvider } from "../providers/SensorsProvider";
+import { createCube, createPlane, generateCompass, generateCubesGrid } from "./objectUtils";
+import { ableToCalibrate, orientationToQuaternion } from "./quaternions";
 import { createAmbientLight, initialiseScene } from "./sceneUtils";
+import { convertGpsToThreeJsCoordinates } from "./locations";
 
 /**
  * Starts the app
@@ -11,27 +13,44 @@ import { createAmbientLight, initialiseScene } from "./sceneUtils";
 export const startThreeApp = (container: HTMLElement) => {
   const [addLight] = createAmbientLight();
   const { scene, animationManager, camera } = initialiseScene(container, {
-    cameraPosition: [0, 0, 10], // camera pointing down
+    cameraPosition: [0, 0, 2], // camera pointing down
     cameraRotation: [0, 0, 0],
   });
 
   // lighting
   addLight(scene);
 
-  // cubes/objects
-  const cubes = generateCubesGrid(20, -0, 3);
-  scene.add(...cubes);
+  const compass = generateCompass(0, 0.3);
+  const cube = createCube([0, 0, 0]);
+
+  scene.add(compass, cube);
 
   // render loop
   const render = () => {
-    // changing the camera orientation based on the device orientation
-    camera.quaternion.copy(orientationToQuaternion({ ...GyroProvider.rawValues }));
+    const {
+      orientation,
+      location: { coords },
+    } = SensorsProvider.values;
+    if (ableToCalibrate(orientation)) {
+      SensorsProvider.calibrateAlpha();
+    }
 
-    // animating the cubes
-    cubes.forEach((cube) => {
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-    });
+    camera.quaternion.copy(orientationToQuaternion(orientation));
+
+    const { longitude, latitude, altitude = 0 } = coords;
+
+    const [lat, lng] = [51.57543804004008, -0.37088029506863074];
+    const locationNorth = {
+      longitude: lng,
+      latitude: lat, //latitude + 0.00005,
+      altitude: (altitude || 0) + 0,
+    };
+
+    const cubePosition = convertGpsToThreeJsCoordinates(
+      { latitude, longitude, altitude: altitude || 0 },
+      locationNorth
+    );
+    cube.position.set(...cubePosition);
   };
 
   animationManager.addCallback(render);

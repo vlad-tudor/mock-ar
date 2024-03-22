@@ -1,13 +1,13 @@
 import { setupLogs } from "./logger";
 import { LOG_SERVER_URL } from "./logger/consts";
-import { GyroProvider } from "./providers/GyroProvider";
+import { SensorsProvider } from "./providers/SensorsProvider";
 import { attachPermissionsGetter } from "./providers/permissions";
 import { startThreeApp } from "./three/startThreeApp";
-import { bearingOffset } from "./utils";
 
 // TODO?: move to gyro provider?
 const testGyro = () =>
-  new Promise((resolve) => setTimeout(() => resolve(GyroProvider.running), 100));
+  new Promise((resolve) => setTimeout(() => resolve(SensorsProvider.running), 100));
+
 /**
  * Main entry point. Start your adventure from here!
  */
@@ -23,7 +23,7 @@ async function main(dev = false) {
 
   // requests device permissions if the device isn't running,
   // skips if the device is already running
-  GyroProvider.start();
+  SensorsProvider.start();
   const runningGyro = await testGyro();
   if (!(dev && runningGyro)) {
     const permissions = await attachPermissionsGetter(startButton);
@@ -39,17 +39,14 @@ async function main(dev = false) {
 
   const log = () => {
     const loggingPayload = {
-      compass: GyroProvider.location.compass,
-      // alpha: GyroProvider.rawValues.alpha,
-      bearingOffset: bearingOffset(
-        -GyroProvider.location.compass + 360,
-        GyroProvider.rawValues.alpha
-      ),
+      latitude: SensorsProvider.values.location.coords.latitude,
+      longitude: SensorsProvider.values.location.coords.longitude,
+      heading: SensorsProvider.values.location.coords.heading,
+      alpha: SensorsProvider.values.orientation.alpha,
     };
-
-    console.info(loggingPayload);
+    // console.info(loggingPayload);
   };
-  GyroProvider.addCallback(log);
+  SensorsProvider.addCallback(log);
 }
 
 main(true);

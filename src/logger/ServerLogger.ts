@@ -2,6 +2,7 @@ import { LoggerApiRoutes, postOptions } from "./consts";
 
 // interfaces with the latest https://github.com/vlad-tudor/logging-server
 // TODO: expand to hold some interesting statistics maybe?
+// TODO: Change to work via web sockets
 export class ServerLogger {
   private url: string;
   private UID?: string;

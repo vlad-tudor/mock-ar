@@ -32,6 +32,20 @@ const requestDeviceOrientation = async (): Promise<boolean> => {
   }
 };
 
+const requestLocation = async (): Promise<boolean> => {
+  if (!("geolocation" in navigator)) {
+    return false;
+  }
+  try {
+    // @ts-ignore
+    const permissionState = await navigator.permissions.query({ name: "geolocation" });
+    return permissionState.state === PermissionState.Granted;
+  } catch (error) {
+    console.error("Permission request denied:", error);
+    return false;
+  }
+};
+
 /**
  * Attaches a click event listener to an  button,
  * which will sequentially request all app permissions when clicked.
@@ -47,8 +61,10 @@ export const attachPermissionsGetter = async (element: HTMLElement): Promise<boo
     const onButtonClick = async () => {
       // add other permission requests here
       const deviceOrientationPermission = await requestDeviceOrientation();
+      const deviceLocationPermission = await requestLocation();
+
       element.removeEventListener("click", onButtonClick);
-      resolve(deviceOrientationPermission);
+      resolve(deviceOrientationPermission && deviceLocationPermission);
     };
     element.addEventListener("click", onButtonClick);
   });

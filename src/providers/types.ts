@@ -8,3 +8,21 @@ export type DeviceOrientation = {
   beta: number;
   gamma: number;
 };
+
+export type SensorsData = {
+  orientation: DeviceOrientation;
+  location: {
+    coords: GeolocationPosition["coords"];
+    compass: number;
+  };
+};
+
+export const defaultCoords: GeolocationPosition["coords"] = {
+  latitude: 0,
+  longitude: 0,
+  accuracy: 0,
+  altitude: 0,
+  altitudeAccuracy: 0,
+  heading: 0,
+  speed: 0,
+};
