@@ -1,4 +1,4 @@
-import { LoggerApiRoutes, postOptions } from "./consts";
+import { FetchOptions, LoggerApiRoutes } from "./consts";
 
 // interfaces with the latest https://github.com/vlad-tudor/logging-server
 // TODO: expand to hold some interesting statistics maybe?
@@ -7,9 +7,20 @@ export class ServerLogger {
   private url: string;
   private UID?: string;
   private hasError?: boolean;
-
+  private ws?: WebSocket;
   constructor(url: string) {
     this.url = url;
+  }
+
+  /**
+   * Connect to the logger server
+   */
+  public async connect(): Promise<void> {
+    this.UID = await this.getUID();
+    if (this.UID) {
+      this.connectToSocket(this.UID);
+      this.hasError = false;
+    }
   }
 
   /**
@@ -17,7 +28,7 @@ export class ServerLogger {
    */
   private async getUID(): Promise<string | undefined> {
     try {
-      const UID = await fetch(`${this.url}${LoggerApiRoutes.getUID}`, postOptions)
+      const UID = await fetch(`${this.url}${LoggerApiRoutes.getUID}`, FetchOptions.GET)
         .then((r) => r.json())
         .then(({ UID }) => UID);
 
@@ -29,20 +40,25 @@ export class ServerLogger {
       this.hasError = false;
       return UID;
     } catch (e) {
-      console.error(e);
       this.hasError = true;
       return undefined;
     }
   }
 
-  /**
-   * Connect to the logger server
-   */
-  public async connect(): Promise<void> {
-    this.UID = await this.getUID();
-    if (this.UID) {
-      this.hasError = false;
+  private sendToSocket(data?: Record<string, any> | string) {
+    if (!this.ws || !this.UID) return;
+    try {
+      this.ws.send(JSON.stringify({ UID: this.UID, data }));
+    } catch (e) {
+      console.error("Socket error,", e);
     }
+  }
+
+  private async connectToSocket(UID: string) {
+    this.ws = new WebSocket(this.url);
+    this.ws.onopen = (event) => {
+      this.sendToSocket(); // Sending a message to the server
+    };
   }
 
   /**
@@ -52,17 +68,7 @@ export class ServerLogger {
     if (!this.UID) {
       return;
     }
-    const log = typeof dataToLog === "string" ? { log: dataToLog } : dataToLog;
-    try {
-      const body = JSON.stringify({ log, UID: this.UID });
-      const response = await fetch(`${this.url}${LoggerApiRoutes.postLog}`, {
-        ...postOptions,
-        body,
-      });
-      return response;
-    } catch (e) {
-      this.hasError = true;
-    }
+    this.sendToSocket(dataToLog);
   }
 
   /**

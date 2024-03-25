@@ -13,7 +13,7 @@ import { convertGpsToThreeJsCoordinates } from "./locations";
 export const startThreeApp = (container: HTMLElement) => {
   const [addLight] = createAmbientLight();
   const { scene, animationManager, camera } = initialiseScene(container, {
-    cameraPosition: [0, 0, 2], // camera pointing down
+    cameraPosition: [0, 0, 20], // camera pointing down
     cameraRotation: [0, 0, 0],
   });
 
@@ -24,6 +24,7 @@ export const startThreeApp = (container: HTMLElement) => {
   const cube = createCube([0, 0, 0]);
 
   scene.add(compass, cube);
+  const [lat, lng] = [51.56406705762348, -0.35443528946451613];
 
   // render loop
   const render = () => {
@@ -38,8 +39,8 @@ export const startThreeApp = (container: HTMLElement) => {
     camera.quaternion.copy(orientationToQuaternion(orientation));
 
     const { longitude, latitude, altitude = 0 } = coords;
+    console.info({ longitude, latitude, orientation });
 
-    const [lat, lng] = [51.57543804004008, -0.37088029506863074];
     const locationNorth = {
       longitude: lng,
       latitude: lat, //latitude + 0.00005,

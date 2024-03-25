@@ -1,11 +1,9 @@
 import { ElementLogger } from "./ElementLogger";
 import { ServerLogger } from "./ServerLogger";
-import { LOG_SERVER_URL } from "./consts";
 
 export type LoggingParams = {
   url: string;
   echo: boolean; // whether to log to the console too
-  allowLogsButton: HTMLElement;
   logsContainer: HTMLElement;
 };
 
@@ -15,30 +13,14 @@ export type LoggingParams = {
  * Changes the button to indicate whether logs should be allowed
  * overrides console.info
  */
-export async function setupLogs({ url, allowLogsButton, logsContainer, echo }: LoggingParams) {
-  console.log({ allowLogsButton, logsContainer });
-  if (!allowLogsButton || !logsContainer) {
+export async function setupLogs({ url, logsContainer, echo }: LoggingParams) {
+  if (!logsContainer) {
     return;
   }
 
   const logger = new ServerLogger(url);
-  await logger.connect();
-
-  if (!logger.connected) {
-    allowLogsButton.innerHTML = "Allow Logs";
-    allowLogsButton!.addEventListener("click", (e) => {
-      e.preventDefault();
-      const redirect = encodeURIComponent(window.location.href);
-      const logUrl = `${LOG_SERVER_URL}/?home=${redirect}`;
-      // Redirect to the logging server
-      window.location.replace(logUrl);
-    });
-  } else {
-    allowLogsButton.innerHTML = "Logs allowed";
-    allowLogsButton.setAttribute("disabled", "true");
-  }
-
   const logElement = new ElementLogger(logsContainer);
+  await logger.connect();
 
   // overriding console.info
   const oldInfo = console.info;

@@ -14,11 +14,9 @@ const testGyro = () =>
 async function main(dev = false) {
   const startButton = document.getElementById("start-button");
   const threeContainer = document.getElementById("threejs-container");
-  const allowLogsButton = document.getElementById("allow-logs");
   const logsContainer = document.getElementById("logs");
 
-  const cannotRun = !threeContainer || !startButton || !logsContainer || !allowLogsButton;
-
+  const cannotRun = !threeContainer || !startButton || !logsContainer;
   if (cannotRun) return;
 
   // requests device permissions if the device isn't running,
@@ -32,21 +30,12 @@ async function main(dev = false) {
     }
   }
 
-  await setupLogs({ url: LOG_SERVER_URL, allowLogsButton, logsContainer, echo: false });
+  // currently the logging_server url is set up to be the same as the app's url
+  // but this is because the logging server's port is mapped on the same container as this UI app
+  //
+  const url = LOG_SERVER_URL;
+  await setupLogs({ url, logsContainer, echo: false });
   startThreeApp(threeContainer);
-
-  // logging
-
-  const log = () => {
-    const loggingPayload = {
-      latitude: SensorsProvider.values.location.coords.latitude,
-      longitude: SensorsProvider.values.location.coords.longitude,
-      heading: SensorsProvider.values.location.coords.heading,
-      alpha: SensorsProvider.values.orientation.alpha,
-    };
-    // console.info(loggingPayload);
-  };
-  SensorsProvider.addCallback(log);
 }
 
 main(true);
