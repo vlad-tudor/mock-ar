@@ -9,7 +9,7 @@ import {
   PlaneGeometry,
   DoubleSide,
 } from "three";
-import { XYZ } from "./types";
+import { XYZ } from "../types";
 
 /**
  * @param { XYZ } position cube position

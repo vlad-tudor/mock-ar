@@ -1,4 +1,7 @@
-import { EnuCoordinate, GpsLocation } from "./types";
+import { EnuCoordinate, GpsLocation } from "../types";
+
+const earthRadius = 6378137; // Earth's radius
+const eccentricity = 8.1819190842622e-2; // Eccentricity
 
 /**
  * Converts GPS coordinates to Earth-Centered, Earth-Fixed (ECEF) coordinates.
@@ -6,21 +9,20 @@ import { EnuCoordinate, GpsLocation } from "./types";
  * @returns The ECEF coordinates [x, y, z].
  */
 function gpsToEcef(location: GpsLocation): EnuCoordinate {
-  const { longitude: lng, latitude: lat, altitude: alt } = location;
+  const { longitude, latitude, altitude } = location;
 
-  const earthRadius = 6378137; // Earth's radius
-  const eccentricity = 8.1819190842622e-2; // Eccentricity
   const primeVerticalRadius =
-    earthRadius / Math.sqrt(1 - eccentricity * eccentricity * Math.sin((lat * Math.PI) / 180) ** 2);
+    earthRadius /
+    Math.sqrt(1 - eccentricity * eccentricity * Math.sin((latitude * Math.PI) / 180) ** 2);
 
-  const cosLatitude = Math.cos((lat * Math.PI) / 180);
-  const sinLatitude = Math.sin((lat * Math.PI) / 180);
-  const cosLongitude = Math.cos((lng * Math.PI) / 180);
-  const sinLongitude = Math.sin((lng * Math.PI) / 180);
+  const cosLatitude = Math.cos((latitude * Math.PI) / 180);
+  const sinLatitude = Math.sin((latitude * Math.PI) / 180);
+  const cosLongitude = Math.cos((longitude * Math.PI) / 180);
+  const sinLongitude = Math.sin((longitude * Math.PI) / 180);
 
-  const x = (primeVerticalRadius + alt) * cosLatitude * cosLongitude;
-  const y = (primeVerticalRadius + alt) * cosLatitude * sinLongitude;
-  const z = (primeVerticalRadius * (1 - eccentricity * eccentricity) + alt) * sinLatitude;
+  const x = (primeVerticalRadius + altitude) * cosLatitude * cosLongitude;
+  const y = (primeVerticalRadius + altitude) * cosLatitude * sinLongitude;
+  const z = (primeVerticalRadius * (1 - eccentricity * eccentricity) + altitude) * sinLatitude;
 
   return [x, y, z];
 }
@@ -37,14 +39,14 @@ function ecefToEnu(
   ecefReference: EnuCoordinate,
   referenceLocation: GpsLocation
 ): EnuCoordinate {
-  const { longitude: lng, latitude: lat } = referenceLocation;
+  const { longitude, latitude } = referenceLocation;
   const [dx, dy, dz] = ecefObject.map((coord, index) => coord - ecefReference[index]);
 
   // Convert latitude and longitude to radians
-  const sinLat = Math.sin((lat * Math.PI) / 180);
-  const cosLat = Math.cos((lat * Math.PI) / 180);
-  const sinLng = Math.sin((lng * Math.PI) / 180);
-  const cosLng = Math.cos((lng * Math.PI) / 180);
+  const sinLat = Math.sin((latitude * Math.PI) / 180);
+  const cosLat = Math.cos((latitude * Math.PI) / 180);
+  const sinLng = Math.sin((longitude * Math.PI) / 180);
+  const cosLng = Math.cos((longitude * Math.PI) / 180);
 
   // Calculate ENU coordinates
   const east = -sinLng * dx + cosLng * dy;

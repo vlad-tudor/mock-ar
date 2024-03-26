@@ -1,5 +1,5 @@
 import { Euler, MathUtils, Quaternion, Vector3 } from "three";
-import { DeviceOrientation } from "../providers/types";
+import { DeviceOrientation } from "../../providers/types";
 
 /**
  * Turn the device orientation into a Quaternion

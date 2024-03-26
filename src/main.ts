@@ -1,7 +1,7 @@
-import { setupLogs } from "./logger";
-import { LOG_SERVER_URL } from "./logger/consts";
+import { setupLogs } from "./logger/logUtils";
+import { LOG_SERVER_URL } from "./logger/logConstants";
 import { SensorsProvider } from "./providers/SensorsProvider";
-import { attachPermissionsGetter } from "./providers/permissions";
+import { attachPermissionsGetter } from "./providers/permissionHandlers";
 import { startThreeApp } from "./three/startThreeApp";
 
 // TODO?: move to gyro provider?

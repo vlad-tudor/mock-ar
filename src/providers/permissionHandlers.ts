@@ -1,4 +1,4 @@
-import { PermissionState } from "./appConstants";
+import { PermissionState } from "./providerConstants";
 
 /**
  * Checks whether the device is capable of providing all required app data

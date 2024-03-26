@@ -1,4 +1,4 @@
-import { FetchOptions, LoggerApiRoutes } from "./consts";
+import { FetchOptions, LoggerApiRoutes } from "./logConstants";
 
 // interfaces with the latest https://github.com/vlad-tudor/logging-server
 // TODO: expand to hold some interesting statistics maybe?

@@ -1,5 +1,5 @@
 import { bearingOffset, bearingWrap } from "../utils";
-import { CallbackManager } from "./CallbackManager";
+import { CallbackManager } from "../managers/CallbackManager";
 import { DeviceOrientation, SensorsData, defaultCoords } from "./types";
 
 /**

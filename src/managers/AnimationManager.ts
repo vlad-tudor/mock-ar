@@ -1,4 +1,4 @@
-import { CallbackManager } from "../providers/CallbackManager";
+import { CallbackManager } from "./CallbackManager";
 
 /**
  * Class to manage the animation loop.

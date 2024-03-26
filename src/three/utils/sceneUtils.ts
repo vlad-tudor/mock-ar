@@ -1,7 +1,7 @@
 import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
-import { CameraOptions } from "./types";
-import { AnimationManager } from "./AnimationManager";
+import { CameraOptions } from "../types";
+import { AnimationManager } from "../../managers/AnimationManager";
 
 /**
  * @param container where the three scene will be attached

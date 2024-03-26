@@ -1,9 +1,9 @@
 import { MathUtils, Quaternion, Vector3 } from "three";
 import { SensorsProvider } from "../providers/SensorsProvider";
-import { createCube, createPlane, generateCompass, generateCubesGrid } from "./objectUtils";
-import { ableToCalibrate, orientationToQuaternion } from "./quaternions";
-import { createAmbientLight, initialiseScene } from "./sceneUtils";
-import { convertGpsToThreeJsCoordinates } from "./locations";
+import { createCube, createPlane, generateCompass, generateCubesGrid } from "./utils/objectUtils";
+import { ableToCalibrate, orientationToQuaternion } from "./utils/deviceOrientationUtils";
+import { createAmbientLight, initialiseScene } from "./utils/sceneUtils";
+import { convertGpsToThreeJsCoordinates } from "./utils/locations";
 
 /**
  * Starts the app
