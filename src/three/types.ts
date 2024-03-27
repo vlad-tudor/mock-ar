@@ -4,6 +4,7 @@ export type NonNullRequired<T> = {
 
 export type XYZ = [x: number, y: number, z: number];
 export type CameraOptions = { cameraRotation: XYZ; cameraPosition: XYZ };
+
 export type EnuCoordinate = [east: number, north: number, up: number];
 
 export type GpsLocation = NonNullRequired<

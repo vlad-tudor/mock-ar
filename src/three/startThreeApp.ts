@@ -1,59 +1,68 @@
-import { MathUtils, Quaternion, Vector3 } from "three";
 import { SensorsProvider } from "../providers/SensorsProvider";
-import { createCube, createPlane, generateCompass, generateCubesGrid } from "./utils/objectUtils";
+import { createSpriteAtLocation, generateCompass } from "./utils/objectCreators";
 import { ableToCalibrate, orientationToQuaternion } from "./utils/deviceOrientationUtils";
 import { createAmbientLight, initialiseScene } from "./utils/sceneUtils";
 import { convertGpsToThreeJsCoordinates } from "./utils/locations";
+import planePath from "../../assets/realistic-plane.png";
+import { scaleSpritesForConsistentSize } from "./utils/objectUtils";
+import { Sprite } from "three";
 
 /**
  * Starts the app
  * Contains setup & render loop
  * @param { HTMLElement} container - the container for the app
  */
-export const startThreeApp = (container: HTMLElement) => {
-  const [addLight] = createAmbientLight();
-  const { scene, animationManager, camera } = initialiseScene(container, {
-    cameraPosition: [0, 0, 20], // camera pointing down
-    cameraRotation: [0, 0, 0],
-  });
+export const startThreeApp = async (container: HTMLElement) => {
+  try {
+    const [addLight] = createAmbientLight();
+    const { scene, animationManager, camera } = initialiseScene(container, {
+      cameraPosition: [0, 0, 20], // camera pointing down
+      cameraRotation: [0, 0, 0],
+    });
 
-  // lighting
-  addLight(scene);
+    // lighting
+    addLight(scene);
 
-  const compass = generateCompass(0, 0.3);
-  const cube = createCube([0, 0, 0]);
+    // OBJECTS
+    const compass = generateCompass(0, 0.3);
+    const plane = createSpriteAtLocation(planePath, 0, 0, 0);
 
-  scene.add(compass, cube);
-  const [lat, lng] = [51.56406705762348, -0.35443528946451613];
+    const [lat, lng] = [51.566377178238845, -0.35709750241636024];
 
-  // render loop
-  const render = () => {
-    const {
-      orientation,
-      location: { coords },
-    } = SensorsProvider.values;
-    if (ableToCalibrate(orientation)) {
-      SensorsProvider.calibrateAlpha();
-    }
+    const planeSprites: Sprite[] = [plane];
 
-    camera.quaternion.copy(orientationToQuaternion(orientation));
+    scene.add(compass, ...planeSprites);
+    // render loop
+    const render = () => {
+      const {
+        orientation,
+        location: { coords },
+      } = SensorsProvider.values;
+      if (ableToCalibrate(orientation)) {
+        SensorsProvider.calibrateAlpha();
+      }
 
-    const { longitude, latitude, altitude = 0 } = coords;
-    console.info({ longitude, latitude, orientation });
+      camera.quaternion.copy(orientationToQuaternion(orientation));
+      const { longitude, latitude, altitude = 0 } = coords;
 
-    const locationNorth = {
-      longitude: lng,
-      latitude: lat, //latitude + 0.00005,
-      altitude: (altitude || 0) + 0,
+      const locationNorth = {
+        longitude: lng,
+        latitude: lat, //latitude + 0.00005,
+        altitude: (altitude || 0) + 0,
+      };
+
+      const newPosition = convertGpsToThreeJsCoordinates(
+        { latitude, longitude, altitude: altitude || 0 },
+        locationNorth
+      );
+
+      scaleSpritesForConsistentSize(planeSprites, camera);
+      plane.position.set(...newPosition);
     };
 
-    const cubePosition = convertGpsToThreeJsCoordinates(
-      { latitude, longitude, altitude: altitude || 0 },
-      locationNorth
-    );
-    cube.position.set(...cubePosition);
-  };
-
-  animationManager.addCallback(render);
-  animationManager.start();
+    animationManager.addCallback(render);
+    animationManager.start();
+  } catch (error) {
+    console.info({ error });
+  }
 };

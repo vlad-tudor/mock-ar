@@ -3,6 +3,7 @@ import { LOG_SERVER_URL } from "./logger/logConstants";
 import { SensorsProvider } from "./providers/SensorsProvider";
 import { attachPermissionsGetter } from "./providers/permissionHandlers";
 import { startThreeApp } from "./three/startThreeApp";
+import { getLondonPlanes } from "./api/OpenskyNetwork";
 
 // TODO?: move to gyro provider?
 const testGyro = () =>
