@@ -18,13 +18,12 @@ import { XYZ } from "../types";
  * @param { XYZ } position cube position
  * @returns { Mesh } a cube mesh
  */
-export const createCube = ([x, y, z]: XYZ): Mesh => {
-  const geometry = new BoxGeometry(1, 1, 1);
+export const createCube = ([x, y, z]: XYZ, size: XYZ = [1, 1, 1]): Mesh => {
+  const geometry = new BoxGeometry(...size);
   const material = new MeshStandardMaterial({ color: 0x00ff00 });
   const cube = new Mesh(geometry, material);
 
   cube.position.set(x, y, z);
-
   return cube;
 };
 
@@ -35,7 +34,12 @@ export const createCube = ([x, y, z]: XYZ): Mesh => {
  * @param spacing spacing between cubes
  * @returns
  */
-export const generateCubesGrid = (sideLength: number, height: number, spacing: number): Mesh[] => {
+export const generateCubesGrid = (
+  sideLength: number,
+  height: number,
+  spacing: number,
+  size?: XYZ
+): Mesh[] => {
   const cubes = [];
   const start = (-(sideLength - 1) * spacing) / 2; // Calculate start position to center grid at origin
 
@@ -46,7 +50,7 @@ export const generateCubesGrid = (sideLength: number, height: number, spacing: n
       const x = start + j * spacing; // Calculate x position
       const y = start + i * spacing; // Calculate y position
 
-      const cube = createCube([x, y, height]);
+      const cube = createCube([x, y, height], size);
       cubes.push(cube);
     }
   }
@@ -116,7 +120,7 @@ export function createSpriteAtLocation(imagePath: string, x: number, y: number, 
   const material = new SpriteMaterial({ map: texture });
   const sprite = new Sprite(material);
 
-  // increase the srptie size
+  // increase the sprite size
   sprite.scale.set(1, 1, 1);
 
   sprite.position.set(x, y, z);

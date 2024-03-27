@@ -103,6 +103,10 @@ export class SensorsProvider {
     SensorsProvider.lastCalibrationTime = timeNow;
   }
 
+  public static get offset(): DeviceOrientation {
+    return { alpha: SensorsProvider.alphaOffset, beta: 0, gamma: 0 };
+  }
+
   public static get rawValues(): SensorsData {
     return {
       orientation: {
@@ -117,9 +121,19 @@ export class SensorsProvider {
     };
   }
 
+  private static ableToCalibrate(degreesThreshold = 3): boolean {
+    return (
+      Math.abs(SensorsProvider.beta) < 3 && Math.abs(SensorsProvider.gamma) <= degreesThreshold
+    );
+  }
+
   // Todo: apply the alpha offset much slower here.
   // -- to avoid camera snapping around
   public static get values(): SensorsData {
+    if (SensorsProvider.ableToCalibrate()) {
+      SensorsProvider.calibrateAlpha();
+    }
+
     return {
       orientation: {
         alpha: bearingWrap(SensorsProvider.alpha - SensorsProvider.alphaOffset),

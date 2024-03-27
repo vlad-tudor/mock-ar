@@ -1,68 +1,72 @@
 import { SensorsProvider } from "../providers/SensorsProvider";
-import { createSpriteAtLocation, generateCompass } from "./utils/objectCreators";
-import { ableToCalibrate, orientationToQuaternion } from "./utils/deviceOrientationUtils";
-import { createAmbientLight, initialiseScene } from "./utils/sceneUtils";
+import { createCube, generateCompass } from "./utils/objectCreators";
+import { orientationToQuaternion } from "./utils/deviceOrientationUtils";
+
+import { ThreeManager } from "./ThreeManager";
+import { MathUtils, Object3D } from "three";
+
+import { AircraftState, getLondonPlanes } from "../api/OpenskyNetwork";
 import { convertGpsToThreeJsCoordinates } from "./utils/locations";
-import planePath from "../../assets/realistic-plane.png";
-import { scaleSpritesForConsistentSize } from "./utils/objectUtils";
-import { Sprite } from "three";
+import { GpsLocation } from "./types";
 
 /**
  * Starts the app
  * Contains setup & render loop
- * @param { HTMLElement} container - the container for the app
+ * @param { HTMLElement} threeContainer - the container for the app
+ * @param { HTMLElement} threeOverlayContainer - the container for the overlay
  */
-export const startThreeApp = async (container: HTMLElement) => {
-  try {
-    const [addLight] = createAmbientLight();
-    const { scene, animationManager, camera } = initialiseScene(container, {
-      cameraPosition: [0, 0, 20], // camera pointing down
-      cameraRotation: [0, 0, 0],
-    });
+export const startThreeApp = async (
+  threeContainer: HTMLElement,
+  threeOverlayContainer: HTMLElement
+) => {
+  const threeManager = new ThreeManager(threeContainer, threeOverlayContainer);
+  threeManager.setCameraOptions({
+    cameraPosition: [0, 0, 10],
+  });
 
-    // lighting
-    addLight(scene);
+  // // OBJECTS
+  const compass = generateCompass(0, 1);
+  compass.position.set(0, 0, -10);
+  // const cubes = generateCubesGrid(20, 0, 3);
+  const cubes: Object3D[] = [];
 
-    // OBJECTS
-    const compass = generateCompass(0, 0.3);
-    const plane = createSpriteAtLocation(planePath, 0, 0, 0);
+  const currentLocation: GpsLocation = {
+    longitude: SensorsProvider.values.location.coords.longitude,
+    latitude: SensorsProvider.values.location.coords.latitude,
+    altitude: SensorsProvider.values.location.coords.altitude || 0,
+  };
 
-    const [lat, lng] = [51.566377178238845, -0.35709750241636024];
-
-    const planeSprites: Sprite[] = [plane];
-
-    scene.add(compass, ...planeSprites);
-    // render loop
-    const render = () => {
-      const {
-        orientation,
-        location: { coords },
-      } = SensorsProvider.values;
-      if (ableToCalibrate(orientation)) {
-        SensorsProvider.calibrateAlpha();
+  getLondonPlanes().then((planes) => {
+    const logs: any = {};
+    planes.forEach((plane, index) => {
+      const [longitude, latitude, altitude] = [plane[5], plane[6], plane[13]];
+      if (longitude && latitude && altitude) {
+        const objectLocation: GpsLocation = { longitude, latitude, altitude };
+        const coords = convertGpsToThreeJsCoordinates(currentLocation, objectLocation);
+        logs[`plane${index}`] = { longitude, latitude, altitude };
+        const cube = createCube(coords);
+        cubes.push(cube);
       }
+    });
+    logs["currentLocation"] = currentLocation;
+    console.log(logs);
+  });
+  const objects = [
+    // add things in order here
+    compass,
+    ...cubes,
+  ];
 
-      camera.quaternion.copy(orientationToQuaternion(orientation));
-      const { longitude, latitude, altitude = 0 } = coords;
+  threeManager.sceneAdd(...objects);
 
-      const locationNorth = {
-        longitude: lng,
-        latitude: lat, //latitude + 0.00005,
-        altitude: (altitude || 0) + 0,
-      };
+  const render = () => {
+    const { orientation } = SensorsProvider.values;
+    const { alpha } = SensorsProvider.offset;
 
-      const newPosition = convertGpsToThreeJsCoordinates(
-        { latitude, longitude, altitude: altitude || 0 },
-        locationNorth
-      );
+    threeManager.setCameraQuaternion(orientationToQuaternion(orientation));
+    threeManager.updateOverlayForObjects(objects, MathUtils.degToRad(alpha));
+  };
 
-      scaleSpritesForConsistentSize(planeSprites, camera);
-      plane.position.set(...newPosition);
-    };
-
-    animationManager.addCallback(render);
-    animationManager.start();
-  } catch (error) {
-    console.info({ error });
-  }
+  threeManager.addAnimationCallback(render);
+  threeManager.startAnimation();
 };

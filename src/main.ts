@@ -3,7 +3,6 @@ import { LOG_SERVER_URL } from "./logger/logConstants";
 import { SensorsProvider } from "./providers/SensorsProvider";
 import { attachPermissionsGetter } from "./providers/permissionHandlers";
 import { startThreeApp } from "./three/startThreeApp";
-import { getLondonPlanes } from "./api/OpenskyNetwork";
 
 // TODO?: move to gyro provider?
 const testGyro = () =>
@@ -15,9 +14,10 @@ const testGyro = () =>
 async function main(dev = false) {
   const startButton = document.getElementById("start-button");
   const threeContainer = document.getElementById("threejs-container");
+  const threeOverlay = document.getElementById("threejs-overlay");
   const logsContainer = document.getElementById("logs");
 
-  const cannotRun = !threeContainer || !startButton || !logsContainer;
+  const cannotRun = !threeContainer || !startButton || !logsContainer || !threeOverlay;
   if (cannotRun) return;
 
   // requests device permissions if the device isn't running,
@@ -36,7 +36,7 @@ async function main(dev = false) {
   //
   const url = LOG_SERVER_URL;
   await setupLogs({ url, logsContainer, echo: false });
-  startThreeApp(threeContainer);
+  startThreeApp(threeContainer, threeOverlay);
 }
 
 main(true);

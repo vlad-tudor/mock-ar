@@ -7,7 +7,7 @@ type LongitudeLatitudeBoundingBox = {
   latitudeMax: number;
 };
 
-type AircraftState = [
+export type AircraftState = [
   icao24: string,
   callsign: string | null,
   origin_country: string,
