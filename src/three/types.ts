@@ -6,7 +6,7 @@ export type NonNullRequired<T> = {
 
 export type XYZ = [x: number, y: number, z: number];
 export type CameraOptions = { cameraRotation: XYZ; cameraPosition: XYZ };
-export type SceneCamera = { camera: Camera; scene: Scene };
+export type SceneCamera<T extends Camera> = { camera: T; scene: Scene };
 
 export type EnuCoordinate = [east: number, north: number, up: number];
 

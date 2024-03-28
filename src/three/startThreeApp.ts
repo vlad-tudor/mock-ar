@@ -1,5 +1,5 @@
 import { SensorsProvider } from "../providers/SensorsProvider";
-import { createCube, generateCompass } from "./utils/objectCreators";
+import { createCube, generateCompass, generateCubesGrid } from "./utils/objectCreators";
 import { orientationToQuaternion } from "./utils/deviceOrientationUtils";
 
 import { ThreeManager } from "./ThreeManager";
@@ -8,6 +8,7 @@ import { MathUtils, Object3D } from "three";
 import { AircraftState, getLondonPlanes } from "../api/OpenskyNetwork";
 import { convertGpsToThreeJsCoordinates } from "./utils/locations";
 import { GpsLocation } from "./types";
+import { OverlayManager } from "./OverlayManager";
 
 /**
  * Starts the app
@@ -19,44 +20,33 @@ export const startThreeApp = async (
   threeContainer: HTMLElement,
   threeOverlayContainer: HTMLElement
 ) => {
-  const threeManager = new ThreeManager(threeContainer, threeOverlayContainer);
-  threeManager.setCameraOptions({
-    cameraPosition: [0, 0, 10],
-  });
+  const threeManager = new ThreeManager(threeContainer);
+  threeManager.setCameraOptions({ cameraPosition: [0, 0, 20] });
+  const overlayManager = new OverlayManager(threeOverlayContainer, threeManager.camera);
 
   // // OBJECTS
   const compass = generateCompass(0, 1);
-  compass.position.set(0, 0, -10);
-  // const cubes = generateCubesGrid(20, 0, 3);
-  const cubes: Object3D[] = [];
+  compass.position.set(0, 0, 0);
 
-  const currentLocation: GpsLocation = {
-    longitude: SensorsProvider.values.location.coords.longitude,
-    latitude: SensorsProvider.values.location.coords.latitude,
-    altitude: SensorsProvider.values.location.coords.altitude || 0,
+  type Plane = {
+    coords: GpsLocation;
+    object: Object3D;
   };
 
-  getLondonPlanes().then((planes) => {
-    const logs: any = {};
-    planes.forEach((plane, index) => {
-      const [longitude, latitude, altitude] = [plane[5], plane[6], plane[13]];
-      if (longitude && latitude && altitude) {
-        const objectLocation: GpsLocation = { longitude, latitude, altitude };
-        const coords = convertGpsToThreeJsCoordinates(currentLocation, objectLocation);
-        logs[`plane${index}`] = { longitude, latitude, altitude };
-        const cube = createCube(coords);
-        cubes.push(cube);
-      }
-    });
-    logs["currentLocation"] = currentLocation;
-    console.log(logs);
-  });
-  const objects = [
-    // add things in order here
-    compass,
-    ...cubes,
-  ];
+  const planesRecord: Record<string, Plane> = {};
 
+  // await getLondonPlanes().then((planes) => {
+  //   planes.forEach((plane) => {
+  //     const [longitude, latitude, altitude] = [plane[5] || 0, plane[6] || 0, plane[13] || 0];
+  //     const coords: GpsLocation = { longitude, latitude, altitude };
+  //     const object = createCube([0, 0, 0]);
+  //     planesRecord[plane[0]] = { coords, object };
+  //   });
+  // });
+
+  const planeObjects = Object.values(planesRecord).map((plane) => plane.object);
+
+  const objects = [...planeObjects, compass];
   threeManager.sceneAdd(...objects);
 
   const render = () => {
@@ -64,7 +54,16 @@ export const startThreeApp = async (
     const { alpha } = SensorsProvider.offset;
 
     threeManager.setCameraQuaternion(orientationToQuaternion(orientation));
-    threeManager.updateOverlayForObjects(objects, MathUtils.degToRad(alpha));
+
+    for (const plane of Object.values(planesRecord)) {
+      const [x, y, z] = convertGpsToThreeJsCoordinates(
+        SensorsProvider.values.location.coords,
+        plane.coords
+      );
+      plane.object.position.set(x, y, z);
+    }
+
+    overlayManager.updateOverlayForObjects(objects, MathUtils.degToRad(alpha));
   };
 
   threeManager.addAnimationCallback(render);

@@ -1,3 +1,5 @@
+import { GpsLocation } from "../three/types";
+
 /**
  * * _alpha:_ **heading** - think compass direction
  * * _beta:_ **pitch** - front-to-back tilt (portrait)
@@ -12,17 +14,13 @@ export type DeviceOrientation = {
 export type SensorsData = {
   orientation: DeviceOrientation;
   location: {
-    coords: GeolocationPosition["coords"];
+    coords: GpsLocation;
     compass: number;
   };
 };
 
-export const defaultCoords: GeolocationPosition["coords"] = {
+export const defaultCoords: GpsLocation = {
   latitude: 0,
   longitude: 0,
-  accuracy: 0,
   altitude: 0,
-  altitudeAccuracy: 0,
-  heading: 0,
-  speed: 0,
 };

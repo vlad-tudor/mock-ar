@@ -1,7 +1,6 @@
 import {
   AmbientLight,
   DirectionalLight,
-  MathUtils,
   Object3D,
   Object3DEventMap,
   PerspectiveCamera,
@@ -17,10 +16,9 @@ import { CameraOptions, SceneCamera } from "./types";
  * Manages the cameras and rendering for the scene.
  */
 export class ThreeManager {
-  private overlay: HTMLElement;
   private dimensions: [width: number, height: number] = [0, 0];
 
-  private perspective: SceneCamera;
+  private perspective: SceneCamera<PerspectiveCamera>;
 
   private renderer = new WebGLRenderer({ alpha: true });
   private animationManager = new AnimationManager();
@@ -29,9 +27,7 @@ export class ThreeManager {
    * Constructs a new CameraManager instance.
    * @param container - The HTML element that will contain the rendered scene.
    */
-  constructor(container: HTMLElement, overlay: HTMLElement) {
-    this.overlay = overlay;
-
+  constructor(container: HTMLElement) {
     const [width, height] = [container.offsetWidth, container.offsetHeight];
     this.dimensions = [width, height];
 
@@ -49,10 +45,10 @@ export class ThreeManager {
     this.renderer.render(this.perspective.scene, this.perspective.camera);
   }
 
-  private createPerspectiveCamera(): SceneCamera {
+  private createPerspectiveCamera(): SceneCamera<PerspectiveCamera> {
     const [width, height] = this.dimensions;
     const scene = new Scene();
-    const camera = new PerspectiveCamera(75, width / height, 0.1, 1000);
+    const camera = new PerspectiveCamera(75, width / height, 0.1, 100000);
     camera.position.set(0, 0, 0);
     camera.rotation.set(0, 0, 0);
     return { camera, scene };
@@ -106,62 +102,7 @@ export class ThreeManager {
     this.perspective.scene.add(...objects);
   }
 
-  // OVERLAY STUFF - move to a separate class
-
-  /**
-   *
-   * @param object3D
-   * @param rotationOffset in radians. Get from Sensor PRovider
-   */
-
-  public updateOverlayForObjects(objects: Object3D[], rotationOffset: number) {
-    for (const object of objects) {
-      this.updateOverlayForObject(object, rotationOffset);
-    }
-  }
-
-  /**
-   *
-   * @param object3D
-   * @param rotationOffset in radians. Get from Sensor PRovider
-   */
-  public updateOverlayForObject(object3D: Object3D, rotationOffset: number) {
-    const vector = new Vector3();
-    object3D.getWorldPosition(vector);
-    vector.project(this.perspective.camera);
-
-    const x = (0.5 + vector.x * 0.5) * this.dimensions[0];
-    const y = (0.5 - vector.y * 0.5) * this.dimensions[1];
-
-    if (vector.z > 1) {
-      return;
-    }
-
-    let element = document.getElementById(object3D.uuid);
-
-    if (!element) {
-      element = this.createCircleOverlayElement(object3D.uuid, "lightgreen", 20);
-      element.id = object3D.uuid;
-      this.overlay.appendChild(element);
-    }
-
-    // Update the HTML element's position
-    element.style.position = "absolute";
-    element.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-
-    // rotate element to face the camera
-    element.style.transform += `rotate(${this.perspective.camera.rotation.z + rotationOffset}rad)`;
-  }
-
-  // TODO: move this to a separate class, to manage colours and stuff
-  private createCircleOverlayElement(id: string, color: string, radius: number) {
-    const circle = document.createElement("div");
-    circle.id = id;
-    circle.style.position = "absolute";
-    circle.style.width = `${radius}px`;
-    circle.style.height = `${radius}px`;
-    circle.style.borderRadius = "50%";
-    circle.style.backgroundColor = color;
-    return circle;
+  public get camera() {
+    return this.perspective.camera;
   }
 }

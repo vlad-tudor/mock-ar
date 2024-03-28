@@ -1,6 +1,7 @@
 import { bearingOffset, bearingWrap } from "../utils";
 import { CallbackManager } from "../managers/CallbackManager";
 import { DeviceOrientation, SensorsData, defaultCoords } from "./types";
+import { GpsLocation } from "../three/types";
 
 /**
  * Cute state encapsulation for the device orientation
@@ -107,6 +108,16 @@ export class SensorsProvider {
     return { alpha: SensorsProvider.alphaOffset, beta: 0, gamma: 0 };
   }
 
+  private static getCoords(): GpsLocation {
+    const coords: GpsLocation = {
+      ...defaultCoords,
+      latitude: SensorsProvider.coords?.latitude ?? 0,
+      longitude: SensorsProvider.coords?.longitude ?? 0,
+      altitude: SensorsProvider.coords?.altitude ?? 0,
+    };
+    return coords;
+  }
+
   public static get rawValues(): SensorsData {
     return {
       orientation: {
@@ -116,7 +127,7 @@ export class SensorsProvider {
       },
       location: {
         compass: SensorsProvider.compass,
-        coords: SensorsProvider.coords ?? defaultCoords,
+        coords: SensorsProvider.getCoords(),
       },
     };
   }
@@ -142,7 +153,7 @@ export class SensorsProvider {
       },
       location: {
         compass: SensorsProvider.compass,
-        coords: SensorsProvider.coords ?? defaultCoords,
+        coords: SensorsProvider.getCoords(),
       },
     };
   }
